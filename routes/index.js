@@ -1,5 +1,6 @@
 var express = require('express')
 var router = express.Router()
+const { loginAccountLimiter } = require('../middleware')
 //var rateLimit = require('express-rate-limit')
 // var { loginAccountLimiter } = require('../middleware')
 var database = require('../database')
@@ -16,7 +17,7 @@ router.get('/', function (req, res, next) {
   })
 })
 
-router.post('/login', function (request, response, next) {
+router.post('/login', loginAccountLimiter, function (request, response, next) {
   var user_email_address = request.body.user_email_address
 
   var user_password = request.body.user_password
@@ -36,8 +37,13 @@ router.post('/login', function (request, response, next) {
         for (var count = 0; count < data.length; count++) {
           if (data[count].user_password == user_password) {
             request.session.user_id = data[count].user_id
+            console.log(data[0])
+            response.render('index', {
+              user: data[0],
 
-            response.redirect('/')
+              title: 'Express',
+              session: request.session,
+            })
           } else {
             response.send('Incorrect Password')
           }
